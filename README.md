@@ -1,6 +1,7 @@
 # PyShield
 
 [![CI](https://github.com/ZN-Forge/pyshield/actions/workflows/ci.yml/badge.svg)](https://github.com/ZN-Forge/pyshield/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/pyshield-security.svg)](https://pypi.org/project/pyshield-security/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python: 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Managed with uv](https://img.shields.io/badge/managed%20with-uv-blueviolet.svg)](https://docs.astral.sh/uv/)
@@ -54,17 +55,41 @@ Its primary purpose is to help developers identify potential security vulnerabil
 
 ---
 
-## Installation & Development Setup
+## Installation
 
-PyShield uses [`uv`](https://docs.astral.sh/uv/) for reproducible, isolated project environment management.
+PyShield can be installed from PyPI using `pip` or `uv`:
+
+```bash
+# Using pip
+pip install pyshield-security
+
+# Using uv
+uv add pyshield-security
+
+# Or as a global CLI tool using uv:
+uv tool install pyshield-security
+```
+
+> [!NOTE]
+> The PyPI distribution package name is **`pyshield-security`**. The command-line command is **`pyshield`**, and the Python import package is **`pyshield`**:
+> ```bash
+> pyshield --version
+> ```
+> ```python
+> import pyshield
+> ```
+
+---
+
+## Development Setup
+
+For local development or contributing, clone the repository and synchronize the isolated virtual environment using [`uv`](https://docs.astral.sh/uv/):
 
 ### Prerequisites
 - Python 3.11 or higher
 - `uv` package manager
 
 ### Setup
-Clone the repository and synchronize the isolated virtual environment:
-
 ```bash
 git clone https://github.com/ZN-Forge/pyshield.git
 cd pyshield
@@ -79,6 +104,10 @@ This creates a project-local `.venv/` containing all runtime and development dep
 
 ### Check Version
 ```bash
+# Direct CLI command (if installed via pip or uv tool):
+pyshield --version
+
+# Or inside the local development environment:
 uv run pyshield --version
 ```
 

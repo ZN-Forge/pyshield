@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pyshield"
+name = "pyshield-security"
 version = "0.1.0"
 description = "Open-source developer-focused security analysis platform for Python projects."
 readme = "README.md"
@@ -12,7 +12,7 @@ requires-python = ">=3.11"
 authors = [
     { name = "ZN-Forge", email = "oss@zn-forge.org" }
 ]
-keywords = ["security", "static-analysis", "ast", "vulnerability", "scanner", "pyshield"]
+keywords = ["security", "static-analysis", "ast", "vulnerability", "scanner", "pyshield", "pyshield-security"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
