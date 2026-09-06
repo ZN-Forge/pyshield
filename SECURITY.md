@@ -16,7 +16,7 @@ If you discover a security vulnerability within PyShield, please report it respo
 
 Instead, please report security issues via GitHub Private Vulnerability Reporting on the repository, or by emailing the maintainers at:
 
-`security@zn-forge.org`
+`codebyredops@gmail.com`
 
 Include as much of the following details as possible:
 - Description of the vulnerability and its potential impact
