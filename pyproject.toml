@@ -30,6 +30,12 @@ dependencies = [
     "rich>=13.7.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/ZN-Forge/pyshield"
+Repository = "https://github.com/ZN-Forge/pyshield"
+Issues = "https://github.com/ZN-Forge/pyshield/issues"
+Documentation = "https://github.com/ZN-Forge/pyshield#readme"
+
 [project.scripts]
 pyshield = "pyshield.cli.main:app"
 
@@ -43,6 +49,11 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyshield"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.github",
+]
 
 [tool.ruff]
 line-length = 100

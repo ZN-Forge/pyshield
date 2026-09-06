@@ -12,8 +12,8 @@ Its primary purpose is to help developers identify potential security vulnerabil
 ---
 
 > [!NOTE]
-> **Current Status: Phase 2 (Secret Detection & Cryptography Analysis)**
-> PyShield provides a fast, deterministic static analysis engine, rule registry, execution/injection rules, secret detection, and cryptography security analysis. All detected secrets are automatically masked in output to prevent sensitive data leakage. Future capabilities (SARIF export, dependency scanning, React UI, etc.) are planned for upcoming phases.
+> **Current Status: Version 0.1.0 (Core Engine, Injection, Secrets & Cryptography)**
+> PyShield v0.1.0 provides a fast, deterministic static analysis engine, rule registry, code execution/injection rules, secret detection, and cryptography security analysis. All detected secrets are automatically masked in output to prevent sensitive data leakage. Future capabilities (SARIF export, dependency scanning, React UI, etc.) are planned for upcoming releases.
 
 ---
 
@@ -147,7 +147,7 @@ The following capabilities are deliberately planned for subsequent phases:
 - **Phase 4+**: Standard SARIF, JSON, and Markdown export formats.
 - **Phase 5+**: Optional Local AI analysis layer (via Ollama / llama.cpp) to explain and contextualize deterministic findings.
 - **Phase 6+**: Local Web UI (React + TypeScript + Vite + Tailwind CSS) with FastAPI backend and SQLite persistence.
-- **Phase 7+**: PyPI distribution package and comprehensive documentation website on GitHub Pages.
+- **Phase 7+**: Comprehensive product/documentation website on GitHub Pages and contributor ecosystem.
 
 ---
 
