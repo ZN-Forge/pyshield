@@ -13,8 +13,8 @@ Its primary purpose is to help developers identify potential security vulnerabil
 ---
 
 > [!NOTE]
-> **Current Status: Version 0.1.0 (Core Engine, Injection, Secrets & Cryptography)**
-> PyShield v0.1.0 provides a fast, deterministic static analysis engine, rule registry, code execution/injection rules, secret detection, and cryptography security analysis. All detected secrets are automatically masked in output to prevent sensitive data leakage. Future capabilities (SARIF export, dependency scanning, React UI, etc.) are planned for upcoming releases.
+> **Current Status: Version 0.2.0 (Core Engine, Injection, Secrets, Cryptography, Configuration & Dependencies)**
+> PyShield v0.2.0 delivers a complete deterministic security suite: AST-based static analysis, injection prevention (`PS10x`), secret masking (`PS20x`), cryptography auditing (`PS30x`), configuration security (`PS70x`), and dependency vulnerability & pinning analysis (`PS80x`) powered by the OSV database with offline support. Future capabilities (SARIF export, React UI, etc.) are planned for upcoming releases.
 
 ---
 
@@ -24,7 +24,7 @@ Its primary purpose is to help developers identify potential security vulnerabil
 2. **Local-First & Privacy-Focused**: Source code is analyzed entirely on your local machine and is never transmitted to external services.
 3. **Secret Protection by Design**: Detected secret values and key material are masked in terminal reports and findings to prevent credential exposure.
 4. **Core Decoupling**: The static security analysis engine is strictly decoupled from presentation, web server, and persistence layers.
-5. **Minimal Dependencies**: The core analysis leverages Python's built-in `ast` standard library to remain fast, lightweight, and maintainable.
+5. **Minimal Dependencies**: The core analysis leverages Python's built-in `ast` and standard library to remain fast, lightweight, and maintainable without heavy external HTTP or dependency frameworks.
 6. **Zero False-Positive Focus**: Rules are designed conservatively to highlight high-confidence security hazards without flooding developers with noise.
 
 ---
@@ -52,6 +52,29 @@ Its primary purpose is to help developers identify potential security vulnerabil
 | **`PS301`** | Weak Hash Algorithm | `MEDIUM` | CWE-328 | Detects insecure MD5 and SHA-1 hashing via `hashlib` (exempts `usedforsecurity=False`). |
 | **`PS302`** | Insecure Cryptographic Algorithm | `HIGH` | CWE-327 | Detects broken legacy ciphers (DES, 3DES, Blowfish, ARC4) in `cryptography` and PyCryptodome. |
 | **`PS303`** | Insecure Randomness | `HIGH` | CWE-338 | Detects use of standard pseudo-random `random` module in security-sensitive contexts (tokens, salts, keys, auth). |
+
+### Configuration Security (Phase 3)
+| Rule ID | Name | Severity | CWE | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **`PS701`** | Debug Mode Enabled | `HIGH` | CWE-489 | Detects `DEBUG = True` enabled in configuration settings, exposing internal state and traces. |
+| **`PS702`** | Insecure TLS Verification | `HIGH` | CWE-295 | Detects HTTP client calls disabling TLS certificate verification (`verify=False`). |
+| **`PS703`** | Insecure Cookie Configuration | `MEDIUM` | CWE-614 | Detects disabled secure cookie transmission (`SESSION_COOKIE_SECURE = False`, etc.). |
+| **`PS704`** | Insecure Host / Origin Wildcard | `HIGH` | CWE-346 | Detects wildcard host/CORS origins (`ALLOWED_HOSTS = ["*"]`, `CORS_ALLOW_ALL_ORIGINS = True`). |
+
+### Dependency Security (Phase 3)
+| Rule ID | Name | Severity | CWE | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **`PS801`** | Known Vulnerable Dependency | `HIGH` | CWE-1395 | Identifies dependencies with known published vulnerabilities via the OSV database. |
+| **`PS802`** | Unpinned Dependency | `MEDIUM` | CWE-1104 | Detects dependencies declared without meaningful version constraints in `requirements.txt` / `pyproject.toml`. |
+
+---
+
+## Supported Dependency Sources
+
+PyShield automatically discovers and analyzes the following dependency sources:
+- **`requirements.txt`** (and `requirements*.txt`): Line-by-line PEP 508 parsing with comment and environment marker support.
+- **`pyproject.toml`**: Standard PEP 621 `[project.dependencies]`, `[project.optional-dependencies]`, and `[dependency-groups]`.
+- **`uv.lock`**: Precise resolved version verification (`uv.lock` is treated as the authoritative resolved source and is exempt from unpinned alerts).
 
 ---
 
@@ -136,6 +159,7 @@ Options:
   -e, --exclude TEXT            Additional glob patterns or directories to exclude
   -d, --disable-rule TEXT       Rule ID to disable (e.g. -d PS101)
   --enable-rule TEXT            Explicit rule ID to run (e.g. --enable-rule PS103)
+  --offline                     Run in offline mode without querying external vulnerability databases
   --help                        Show help message and exit
 ```
 
@@ -172,7 +196,7 @@ The following capabilities are deliberately planned for subsequent phases:
 
 - **Phase 1 (Completed)**: Core static analysis engine, rule registry, injection rules (`PS101`–`PS104`), CLI, and terminal reporter.
 - **Phase 2 (Completed)**: Secret detection engine (`PS201`–`PS203`) and Cryptography rules (`PS301`–`PS303`) with zero leakage protection.
-- **Phase 3+**: Dependency vulnerability scanning (`PS8xx`) and Framework-specific rules (Django, FastAPI, Flask).
+- **Phase 3 (Completed)**: Dependency vulnerability scanning (`PS801`), pinning analysis (`PS802`), and Configuration security rules (`PS701`–`PS704`) with offline mode.
 - **Phase 4+**: Standard SARIF, JSON, and Markdown export formats.
 - **Phase 5+**: Optional Local AI analysis layer (via Ollama / llama.cpp) to explain and contextualize deterministic findings.
 - **Phase 6+**: Local Web UI (React + TypeScript + Vite + Tailwind CSS) with FastAPI backend and SQLite persistence.

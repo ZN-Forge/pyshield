@@ -52,3 +52,20 @@ def trigger_insecure_random():
     # PS303
     auth_token = str(random.random())
     return auth_token
+
+
+# PS701: Debug mode enabled
+DEBUG = True
+
+# PS703: Insecure cookie configuration
+SESSION_COOKIE_SECURE = False
+
+# PS704: Insecure host wildcard
+ALLOWED_HOSTS = ["*"]
+
+
+def trigger_insecure_tls(url: str):
+    # PS702
+    import requests
+    return requests.get(url, verify=False)
+

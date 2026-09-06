@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyshield-security"
-version = "0.1.0"
+version = "0.2.0"
 description = "Open-source developer-focused security analysis platform for Python projects."
 readme = "README.md"
 license = { text = "MIT" }

@@ -52,3 +52,7 @@ class ScanConfig(BaseModel):
         default=None,
         description="Explicit set of rule IDs to run (runs all registered if None)",
     )
+    offline: bool = Field(
+        default=False,
+        description="Run in offline mode without querying external vulnerability databases",
+    )

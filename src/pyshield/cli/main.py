@@ -69,6 +69,11 @@ def scan(
         "--enable-rule",
         help="Explicit rule IDs to enable (only these will run).",
     ),
+    offline: bool = typer.Option(
+        False,
+        "--offline",
+        help="Run in offline mode without querying external vulnerability databases.",
+    ),
 ) -> None:
     """Run deterministic static security analysis on the specified paths."""
     target_paths = paths if paths else [Path(".")]
@@ -90,6 +95,7 @@ def scan(
         fail_on=fail_on,
         disabled_rules=set(disable_rule) if disable_rule else set(),
         enabled_rules=set(enable_rule) if enable_rule else None,
+        offline=offline,
     )
 
     try:

@@ -9,6 +9,7 @@ from pyshield.config.models import ScanConfig
 from pyshield.core.analyzer import ASTAnalyzer
 from pyshield.core.models import Finding, ScanResult, ScanSummary, Severity
 from pyshield.core.registry import RuleRegistry
+from pyshield.dependencies.scanner import DependencyScanner
 
 
 def should_exclude(path: Path, exclude_patterns: list[str]) -> bool:
@@ -26,6 +27,16 @@ def should_exclude(path: Path, exclude_patterns: list[str]) -> bool:
             return True
 
     return False
+
+
+def is_dependency_file(path: Path) -> bool:
+    """Check if file matches recognized dependency file patterns."""
+    name = path.name.lower()
+    return (
+        name == "uv.lock"
+        or name == "pyproject.toml"
+        or (name.startswith("requirements") and name.endswith(".txt"))
+    )
 
 
 def discover_python_files(
@@ -54,6 +65,34 @@ def discover_python_files(
                 file_path = root_dir / file_name
                 if not should_exclude(file_path, exclude_patterns):
                     discovered.append(file_path)
+
+    return sorted(discovered)
+
+
+def discover_dependency_files(
+    target_path: Path,
+    exclude_patterns: list[str],
+) -> list[Path]:
+    """Discover dependency files (requirements*.txt, pyproject.toml, uv.lock)."""
+    if not target_path.exists():
+        raise FileNotFoundError(f"Target path does not exist: {target_path}")
+
+    # If single file target
+    if target_path.is_file():
+        if is_dependency_file(target_path) and not should_exclude(target_path, exclude_patterns):
+            return [target_path]
+        return []
+
+    discovered: list[Path] = []
+    visited_dirs: set[str] = set()
+
+    for root_dir, dirs, files in _safe_walk(target_path, visited_dirs):
+        dirs[:] = [d for d in dirs if not should_exclude(root_dir / d, exclude_patterns)]
+
+        for file_name in files:
+            file_path = root_dir / file_name
+            if is_dependency_file(file_path) and not should_exclude(file_path, exclude_patterns):
+                discovered.append(file_path)
 
     return sorted(discovered)
 
@@ -122,15 +161,17 @@ class ScanEngine:
         files_failed = 0
 
         # Collect files from all target paths
-        target_files: list[Path] = []
+        target_py_files: list[Path] = []
+        target_dep_files: list[Path] = []
         for target in self.config.target_paths:
-            found = discover_python_files(target, self.config.exclude_patterns)
-            target_files.extend(found)
+            target_py_files.extend(discover_python_files(target, self.config.exclude_patterns))
+            target_dep_files.extend(discover_dependency_files(target, self.config.exclude_patterns))
 
-        # Remove potential duplicates while preserving order
-        unique_files = list(dict.fromkeys(target_files))
+        unique_py_files = list(dict.fromkeys(target_py_files))
+        unique_dep_files = list(dict.fromkeys(target_dep_files))
 
-        for file_path in unique_files:
+        # 1. Analyze Python source files with ASTAnalyzer
+        for file_path in unique_py_files:
             findings, diagnostic = analyzer.analyze_file(
                 file_path=file_path,
                 max_file_size_bytes=self.config.max_file_size_bytes,
@@ -141,6 +182,20 @@ class ScanEngine:
             else:
                 files_scanned += 1
                 all_findings.extend(findings)
+
+        # 2. Analyze dependency files with DependencyScanner
+        if unique_dep_files:
+            dep_scanner = DependencyScanner(
+                rules=active_rules,
+                offline=self.config.offline,
+            )
+            dep_findings, dep_diagnostics = dep_scanner.scan_files(unique_dep_files)
+            all_findings.extend(dep_findings)
+            all_diagnostics.extend(dep_diagnostics)
+
+            failed_dep_files = {d.file_path for d in dep_diagnostics if d.error_type == "ReadError"}
+            files_failed += len(failed_dep_files)
+            files_scanned += len(unique_dep_files) - len(failed_dep_files)
 
         # Sort findings deterministically: file, line, col, rule_id
         all_findings.sort(key=lambda f: (str(f.file_path), f.line, f.column, f.rule_id))

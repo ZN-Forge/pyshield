@@ -24,7 +24,7 @@ class TestCLI:
         result = runner.invoke(app, ["scan", "tests/fixtures/vulnerable"])
         assert result.exit_code == 1
 
-        # Verify all Phase 1 and Phase 2 rules are triggered
+        # Verify all Phase 1, Phase 2, and Phase 3 configuration rules are triggered
         expected_rules = [
             "PS101",
             "PS102",
@@ -36,6 +36,10 @@ class TestCLI:
             "PS301",
             "PS302",
             "PS303",
+            "PS701",
+            "PS702",
+            "PS703",
+            "PS704",
         ]
         for rule_id in expected_rules:
             assert rule_id in result.output
@@ -47,20 +51,11 @@ class TestCLI:
         assert "AKIA****************" in result.output
 
     def test_scan_with_all_rules_disabled(self) -> None:
+        from pyshield.rules.builtin import BUILTIN_RULES
+
         disabled_args = []
-        for rule_id in [
-            "PS101",
-            "PS102",
-            "PS103",
-            "PS104",
-            "PS201",
-            "PS202",
-            "PS203",
-            "PS301",
-            "PS302",
-            "PS303",
-        ]:
-            disabled_args.extend(["--disable-rule", rule_id])
+        for rule_cls in BUILTIN_RULES:
+            disabled_args.extend(["--disable-rule", rule_cls.rule_id])
 
         result = runner.invoke(app, ["scan", "tests/fixtures/vulnerable", *disabled_args])
         assert result.exit_code == 0

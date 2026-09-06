@@ -12,7 +12,7 @@ from pyshield.rules.builtin.unsafe_subprocess import UnsafeSubprocessRule
 class TestRuleRegistry:
     def test_default_registry_contains_builtin_rules(self) -> None:
         registry = RuleRegistry.create_default()
-        assert len(registry) == 10
+        assert len(registry) == 16
         expected_ids = {
             "PS101",
             "PS102",
@@ -24,6 +24,12 @@ class TestRuleRegistry:
             "PS301",
             "PS302",
             "PS303",
+            "PS701",
+            "PS702",
+            "PS703",
+            "PS704",
+            "PS801",
+            "PS802",
         }
         for rid in expected_ids:
             assert rid in registry
