@@ -78,11 +78,14 @@ class BaseRule(ABC):
         end_node: ast.AST | None = None,
         custom_severity: Severity | None = None,
         custom_confidence: Confidence | None = None,
+        custom_snippet: str | None = None,
+        custom_line: int | None = None,
+        custom_column: int | None = None,
     ) -> Finding:
         """Convenience method to construct a validated Finding from an AST node."""
-        line = getattr(node, "lineno", 1)
+        line = custom_line if custom_line is not None else getattr(node, "lineno", 1)
         # ast col_offset is 0-indexed; present as 1-indexed column for user consistency
-        col = getattr(node, "col_offset", 0) + 1
+        col = custom_column if custom_column is not None else (getattr(node, "col_offset", 0) + 1)
 
         end_line: int | None = getattr(end_node or node, "end_lineno", None)
         end_col: int | None = None
@@ -90,7 +93,7 @@ class BaseRule(ABC):
         if raw_end_col is not None:
             end_col = raw_end_col + 1
 
-        snippet = context.get_snippet(line)
+        snippet = custom_snippet if custom_snippet is not None else context.get_snippet(line)
 
         return Finding(
             rule_id=self.rule_id,

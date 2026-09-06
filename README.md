@@ -12,8 +12,8 @@ Its primary purpose is to help developers identify potential security vulnerabil
 ---
 
 > [!NOTE]
-> **Current Status: Phase 1 (Alpha / Early Foundation)**
-> PyShield is currently in Phase 1 development. The core deterministic static analysis engine, rule registry, initial execution/injection rules, CLI, and terminal reporter are implemented and tested. Future capabilities (AI context, React UI, dependency scanning, etc.) are planned for later phases.
+> **Current Status: Phase 2 (Secret Detection & Cryptography Analysis)**
+> PyShield provides a fast, deterministic static analysis engine, rule registry, execution/injection rules, secret detection, and cryptography security analysis. All detected secrets are automatically masked in output to prevent sensitive data leakage. Future capabilities (SARIF export, dependency scanning, React UI, etc.) are planned for upcoming phases.
 
 ---
 
@@ -21,20 +21,36 @@ Its primary purpose is to help developers identify potential security vulnerabil
 
 1. **Deterministic-First**: Security detection is powered primarily by deterministic AST analysis and strict rules. Findings are verifiable and reproducible.
 2. **Local-First & Privacy-Focused**: Source code is analyzed entirely on your local machine and is never transmitted to external services.
-3. **Core Decoupling**: The static security analysis engine is strictly decoupled from presentation, web server, and persistence layers.
-4. **Minimal Dependencies**: The core analysis leverages Python's built-in `ast` standard library to remain fast, lightweight, and maintainable.
-5. **Zero False-Positive Focus**: Rules are designed conservatively to highlight high-confidence security hazards without flooding developers with noise.
+3. **Secret Protection by Design**: Detected secret values and key material are masked in terminal reports and findings to prevent credential exposure.
+4. **Core Decoupling**: The static security analysis engine is strictly decoupled from presentation, web server, and persistence layers.
+5. **Minimal Dependencies**: The core analysis leverages Python's built-in `ast` standard library to remain fast, lightweight, and maintainable.
+6. **Zero False-Positive Focus**: Rules are designed conservatively to highlight high-confidence security hazards without flooding developers with noise.
 
 ---
 
-## Supported Rules (Phase 1)
+## Supported Rules
 
+### Execution & Code Injection (Phase 1)
 | Rule ID | Name | Severity | CWE | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | **`PS101`** | Dangerous `eval()` usage | `CRITICAL` | CWE-95 | Detects calls to built-in `eval()`, preventing dynamic code execution risks. |
 | **`PS102`** | Dangerous `exec()` usage | `CRITICAL` | CWE-95 | Detects calls to built-in `exec()`, preventing dynamic statement execution vulnerabilities. |
 | **`PS103`** | Use of `os.system()` | `HIGH` | CWE-78 | Detects calls to `os.system()` which execute commands via shell strings. |
 | **`PS104`** | Unsafe `subprocess` execution | `HIGH` | CWE-78 | Detects subprocess execution calls configured with `shell=True`. |
+
+### Secret & Key Material Detection (Phase 2)
+| Rule ID | Name | Severity | CWE | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **`PS201`** | Hardcoded Secret / Credential | `HIGH` | CWE-798 | Detects hardcoded passwords, tokens, secrets, and API keys with entropy filtering and placeholder exclusion. |
+| **`PS202`** | Private Key Material | `CRITICAL` | CWE-321 | Detects hardcoded RSA, EC, DSA, and OpenSSH private key PEM headers and content. |
+| **`PS203`** | High-Confidence API Token | `HIGH` | CWE-798 | Detects provider-specific tokens (AWS, GitHub classic/fine-grained, Slack, Google, Stripe) using strict patterns. |
+
+### Cryptographic Analysis (Phase 2)
+| Rule ID | Name | Severity | CWE | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **`PS301`** | Weak Hash Algorithm | `MEDIUM` | CWE-328 | Detects insecure MD5 and SHA-1 hashing via `hashlib` (exempts `usedforsecurity=False`). |
+| **`PS302`** | Insecure Cryptographic Algorithm | `HIGH` | CWE-327 | Detects broken legacy ciphers (DES, 3DES, Blowfish, ARC4) in `cryptography` and PyCryptodome. |
+| **`PS303`** | Insecure Randomness | `HIGH` | CWE-338 | Detects use of standard pseudo-random `random` module in security-sensitive contexts (tokens, salts, keys, auth). |
 
 ---
 
@@ -125,7 +141,8 @@ uv run mypy src
 
 The following capabilities are deliberately planned for subsequent phases:
 
-- **Phase 2+**: Secret detection engine (`PS2xx`) and Cryptography rules (`PS3xx`).
+- **Phase 1 (Completed)**: Core static analysis engine, rule registry, injection rules (`PS101`–`PS104`), CLI, and terminal reporter.
+- **Phase 2 (Completed)**: Secret detection engine (`PS201`–`PS203`) and Cryptography rules (`PS301`–`PS303`) with zero leakage protection.
 - **Phase 3+**: Dependency vulnerability scanning (`PS8xx`) and Framework-specific rules (Django, FastAPI, Flask).
 - **Phase 4+**: Standard SARIF, JSON, and Markdown export formats.
 - **Phase 5+**: Optional Local AI analysis layer (via Ollama / llama.cpp) to explain and contextualize deterministic findings.
