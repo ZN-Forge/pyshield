@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Automated Release & Distribution Pipeline (Phase 4)**:
+  - Dedicated production release workflow (`.github/workflows/release.yml`) triggered strictly on published GitHub Releases (`on: release: types: [published]`).
+  - Production package publishing via PyPI Trusted Publishing using GitHub OpenID Connect (OIDC) identity (`pypa/gh-action-pypi-publish`), removing reliance on long-lived PyPI API tokens.
+  - Deterministic release validation script (`scripts/validate_release.py`) enforcing strict semantic tag formatting (`vMAJOR.MINOR.PATCH`), exact version synchronization across `pyproject.toml` and runtime `src/pyshield/__init__.py`, and package identity assertions (`pyshield-security` distribution name, `pyshield` CLI, `pyshield` import).
+  - Pre-publish quality gates, distribution artifact validation (`twine check --strict`), distribution integrity verification, and isolated virtual environment package installation smoke testing.
+  - Comprehensive unit test suite for release validation (`tests/unit/test_release_validation.py`).
+
 ## [0.2.0] - 2026-09-06
 
 ### Added

@@ -1,0 +1,113 @@
+name: Release & Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Build, Validate & Publish to PyPI
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Mandatory for PyPI Trusted Publishing via OIDC
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python 3.11
+        run: uv python install 3.11
+
+      - name: Install project dependencies from lockfile
+        run: uv sync --frozen
+
+      - name: Validate release tag against package metadata
+        run: uv run python scripts/validate_release.py --tag "${{ github.event.release.tag_name }}"
+
+      - name: Defensive check for existing PyPI release
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG#v}"
+          echo "Checking whether pyshield-security==$VERSION already exists on PyPI..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/pyshield-security/${VERSION}/json" || echo "FAILED")
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "::error::Version $VERSION is already published on PyPI. Re-publishing or overwriting an existing release is prohibited."
+            exit 1
+          elif [ "$HTTP_STATUS" = "404" ]; then
+            echo "Version $VERSION does not exist on PyPI. Proceeding with release."
+          elif [ "$HTTP_STATUS" = "FAILED" ]; then
+            echo "::warning::PyPI pre-check network request failed. Proceeding with caution; PyPI API will enforce uniqueness during publishing."
+          else
+            echo "::warning::PyPI pre-check returned HTTP $HTTP_STATUS. Proceeding with release."
+          fi
+
+      - name: Run Ruff linter
+        run: uv run ruff check .
+
+      - name: Run Ruff formatting check
+        run: uv run ruff format --check .
+
+      - name: Run mypy type checker
+        run: uv run mypy src
+
+      - name: Run pytest test suite and coverage
+        run: uv run pytest --cov=pyshield --cov-report=term-missing
+
+      - name: Run quality gate verification script
+        run: uv run python scripts/check.py
+
+      - name: Clean previous build artifacts
+        run: rm -rf dist
+
+      - name: Build wheel and sdist distributions
+        run: uv build
+
+      - name: Validate distribution metadata with Twine
+        run: uvx twine check --strict dist/*
+
+      - name: Verify distribution artifacts match release version
+        run: uv run python scripts/validate_release.py --tag "${{ github.event.release.tag_name }}" --verify-dist
+
+      - name: Isolated package installation smoke test
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          EXPECTED_VERSION="${TAG#v}"
+          uv venv /tmp/smoke-venv
+          uv pip install --python /tmp/smoke-venv dist/pyshield_security-*.whl
+
+          CLI_OUT=$(/tmp/smoke-venv/bin/pyshield --version)
+          echo "CLI version output: $CLI_OUT"
+          if [[ "$CLI_OUT" != *"PyShield $EXPECTED_VERSION"* ]]; then
+            echo "::error::CLI output '$CLI_OUT' does not contain 'PyShield $EXPECTED_VERSION'"
+            exit 1
+          fi
+
+          IMPORT_OUT=$(/tmp/smoke-venv/bin/python -c "import pyshield; print(pyshield.__version__)")
+          echo "Imported version output: $IMPORT_OUT"
+          if [[ "$IMPORT_OUT" != "$EXPECTED_VERSION" ]]; then
+            echo "::error::Imported version '$IMPORT_OUT' does not match expected '$EXPECTED_VERSION'"
+            exit 1
+          fi
+
+      - name: Upload distribution artifacts to GitHub Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: pyshield-security-dist-${{ github.event.release.tag_name }}
+          path: dist/
+          if-no-files-found: error
+
+      - name: Publish package distributions to PyPI via Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          print-hash: true

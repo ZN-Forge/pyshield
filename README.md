@@ -190,6 +190,41 @@ uv run mypy src
 
 ---
 
+## Release & Distribution
+
+PyShield packages are published automatically to PyPI via **GitHub Actions** and **PyPI Trusted Publishing (OIDC)** whenever a new GitHub Release is created.
+
+### Release Trigger & Security
+- **Explicit Human Trigger**: Production releases are triggered **only** by publishing a new GitHub Release (`on: release: types: [published]`). Regular branch pushes, pull requests, and commits never publish to PyPI.
+- **OIDC Trusted Publishing**: Authentication to PyPI uses short-lived cryptographic tokens via GitHub's OpenID Connect identity provider (`pypa/gh-action-pypi-publish`). No long-lived API tokens or passwords are saved as repository secrets.
+- **Semantic Tag Synchronization**: Release tags must strictly follow `vMAJOR.MINOR.PATCH` (e.g. `v0.3.0`) and must match the package version in `pyproject.toml` and `src/pyshield/__init__.py`. If versions mismatch, the release workflow fails immediately before building.
+- **Pre-Publish Verification**: The workflow runs complete code formatting, linting, strict typing, tests, builds clean wheel and sdist distributions, runs `twine check --strict`, and smoke-tests installation of the built wheel in an isolated environment.
+
+### Developer Release Procedure
+1. Update the version in `pyproject.toml` and `src/pyshield/__init__.py` (e.g., `0.3.0`).
+2. Run the complete local quality gate:
+   ```bash
+   uv run python scripts/check.py
+   ```
+3. Commit and push the changes to `main`:
+   ```bash
+   git add pyproject.toml src/pyshield/__init__.py CHANGELOG.md
+   git commit -m "chore: prepare v0.3.0 release"
+   git push origin main
+   ```
+4. In GitHub, create and publish a new Release with tag `v0.3.0`.
+5. The GitHub Actions release workflow (`.github/workflows/release.yml`) automatically executes the validation, build, and publishing pipeline.
+
+### PyPI Trusted Publishing Configuration
+Maintainers configure the trust relationship on PyPI under Project Settings:
+- **PyPI Project**: `pyshield-security`
+- **Owner**: `ZN-Forge`
+- **Repository**: `pyshield`
+- **Workflow Name**: `release.yml`
+- **Environment**: *(leave empty)*
+
+---
+
 ## Planned Architecture (Future Phases)
 
 The following capabilities are deliberately planned for subsequent phases:
@@ -197,10 +232,11 @@ The following capabilities are deliberately planned for subsequent phases:
 - **Phase 1 (Completed)**: Core static analysis engine, rule registry, injection rules (`PS101`–`PS104`), CLI, and terminal reporter.
 - **Phase 2 (Completed)**: Secret detection engine (`PS201`–`PS203`) and Cryptography rules (`PS301`–`PS303`) with zero leakage protection.
 - **Phase 3 (Completed)**: Dependency vulnerability scanning (`PS801`), pinning analysis (`PS802`), and Configuration security rules (`PS701`–`PS704`) with offline mode.
-- **Phase 4+**: Standard SARIF, JSON, and Markdown export formats.
-- **Phase 5+**: Optional Local AI analysis layer (via Ollama / llama.cpp) to explain and contextualize deterministic findings.
-- **Phase 6+**: Local Web UI (React + TypeScript + Vite + Tailwind CSS) with FastAPI backend and SQLite persistence.
-- **Phase 7+**: Comprehensive product/documentation website on GitHub Pages and contributor ecosystem.
+- **Phase 4 (Completed)**: Automated GitHub Release to PyPI distribution pipeline using OIDC Trusted Publishing and deterministic version validation.
+- **Phase 5+**: Standard SARIF, JSON, and Markdown export formats.
+- **Phase 6+**: Optional Local AI analysis layer (via Ollama / llama.cpp) to explain and contextualize deterministic findings.
+- **Phase 7+**: Local Web UI (React + TypeScript + Vite + Tailwind CSS) with FastAPI backend and SQLite persistence.
+- **Phase 8+**: Comprehensive product/documentation website on GitHub Pages and contributor ecosystem.
 
 ---
 
