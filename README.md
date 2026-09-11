@@ -13,8 +13,8 @@ Its primary purpose is to help developers identify potential security vulnerabil
 ---
 
 > [!NOTE]
-> **Current Status: Version 0.3.0 (Core Security Suite & Automated Release Pipeline)**
-> PyShield v0.3.0 delivers a complete deterministic security suite: AST-based static analysis, injection prevention (`PS10x`), secret masking (`PS20x`), cryptography auditing (`PS30x`), configuration security (`PS70x`), dependency vulnerability & pinning analysis (`PS80x`) with offline support, and automated GitHub Release to PyPI publishing via OIDC Trusted Publishing. Future capabilities (SARIF export, React UI, etc.) are planned for upcoming releases.
+> **Current Status: [![PyPI version](https://img.shields.io/pypi/v/pyshield-security.svg)](https://pypi.org/project/pyshield-security/) (Production Release)**
+> PyShield delivers a complete deterministic security suite: AST-based static analysis, injection prevention (`PS10x`), secret masking (`PS20x`), cryptography auditing (`PS30x`), configuration security (`PS70x`), dependency vulnerability & pinning analysis (`PS80x`) with offline support, and automated GitHub Release to PyPI publishing via OIDC Trusted Publishing. Future capabilities (SARIF export, React UI, etc.) are planned for upcoming releases.
 
 ---
 
