@@ -5,6 +5,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
+from pyshield import __version__
 from pyshield.core.models import Severity
 from pyshield.dependencies.models import (
     ProviderStatus,
@@ -17,7 +18,7 @@ OSV_QUERY_URL = "https://api.osv.dev/v1/query"
 OSV_BATCH_URL = "https://api.osv.dev/v1/querybatch"
 DEFAULT_TIMEOUT_SECONDS = 5.0
 MAX_RESPONSE_BYTES = 2 * 1024 * 1024  # 2MB response size limit
-USER_AGENT = "PyShield-Security-Scanner/0.2.0"
+USER_AGENT = f"PyShield-Security-Scanner/{__version__}"
 
 
 class OSVProvider(BaseVulnerabilityProvider):

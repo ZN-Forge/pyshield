@@ -12,11 +12,11 @@ runner = CliRunner()
 
 
 class TestCLIPhase3:
-    def test_version_output_0_2_0(self) -> None:
+    def test_version_output_0_3_0(self) -> None:
         result = runner.invoke(app, ["--version"])
         assert result.exit_code == 0
         assert f"PyShield {__version__}" in result.output
-        assert "0.2.0" in result.output
+        assert "0.3.0" in result.output
 
     def test_scan_unpinned_requirements_triggers_ps802(self, tmp_path: Path) -> None:
         req_file = tmp_path / "requirements.txt"

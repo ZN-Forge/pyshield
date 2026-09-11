@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2026-09-11
 
 ### Added
 - **Automated Release & Distribution Pipeline (Phase 4)**:
@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Deterministic release validation script (`scripts/validate_release.py`) enforcing strict semantic tag formatting (`vMAJOR.MINOR.PATCH`), exact version synchronization across `pyproject.toml` and runtime `src/pyshield/__init__.py`, and package identity assertions (`pyshield-security` distribution name, `pyshield` CLI, `pyshield` import).
   - Pre-publish quality gates, distribution artifact validation (`twine check --strict`), distribution integrity verification, and isolated virtual environment package installation smoke testing.
   - Comprehensive unit test suite for release validation (`tests/unit/test_release_validation.py`).
+
+### Changed
+- Security vulnerability reporting email updated across project governance files.
 
 ## [0.2.0] - 2026-09-06
 

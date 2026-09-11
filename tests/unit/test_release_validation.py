@@ -220,12 +220,12 @@ class TestVerifyDistArtifacts:
 
 
 class TestValidateReleaseCLI:
-    def test_cli_on_current_repo_v0_2_0(self) -> None:
+    def test_cli_on_current_repo_v0_3_0(self) -> None:
         cmd = [
             sys.executable,
             str(PROJECT_ROOT / "scripts" / "validate_release.py"),
             "--tag",
-            "v0.2.0",
+            "v0.3.0",
             "--root",
             str(PROJECT_ROOT),
         ]
@@ -238,7 +238,7 @@ class TestValidateReleaseCLI:
             sys.executable,
             str(PROJECT_ROOT / "scripts" / "validate_release.py"),
             "--tag",
-            "v0.3.0",
+            "v0.99.0",
             "--root",
             str(PROJECT_ROOT),
         ]
